@@ -54,3 +54,7 @@ COPY --from=proto3 /usr/local/include/google /usr/local/include/google
 COPY --from=runc   /usr/local/sbin/runc      /usr/local/go/bin/runc
 
 COPY . .
+RUN make binaries install
+RUN mkdir -p /etc/containerd
+RUN containerd config default > /etc/containerd/config.toml
+ENTRYPOINT containerd
