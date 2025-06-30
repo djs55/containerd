@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/user"
 	"path/filepath"
 
 	"golang.org/x/sys/unix"
@@ -59,9 +60,12 @@ func GetLocalListener(path string, uid, gid int) (net.Listener, error) {
 		return nil, err
 	}
 
-	if err := os.Chown(path, uid, gid); err != nil {
-		l.Close()
-		return nil, err
+	// If not running as root, don't try to Chown
+	if u, err := user.Current(); err == nil && u.Uid == "0" {
+		if err := os.Chown(path, uid, gid); err != nil {
+			l.Close()
+			return nil, err
+		}
 	}
 
 	return l, nil
