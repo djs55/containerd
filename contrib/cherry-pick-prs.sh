@@ -21,9 +21,9 @@ cherry_pick_pr() {
         return 1
     fi
 
-    # Get merge base and commits
+    # Get merge base and commits (skip merge commits)
     local merge_base=$(git merge-base HEAD "$pr_branch")
-    local commits=$(git rev-list --reverse "$merge_base..$pr_branch")
+    local commits=$(git rev-list --reverse --no-merges "$merge_base..$pr_branch")
     local count=$(echo "$commits" | wc -l)
 
     echo "Found $count commit(s) to cherry-pick"
@@ -59,6 +59,11 @@ echo ""
 # ============================================================================
 
 # cherry_pick_pr <owner/repo> <pr_number>
+#
+# The following PRs have been merged to upstream main and are included via rebase:
+#   #12821, #12836, #12849, #12868, #12913, #12916, #12923, #12928
+#
+# Only cherry-pick PRs that are still open:
 cherry_pick_pr containerd/containerd 12608
 cherry_pick_pr containerd/containerd 12562 # This also contains a commit from 12608, but that's fine since it will be skipped
 cherry_pick_pr containerd/containerd 12667
@@ -66,5 +71,6 @@ cherry_pick_pr containerd/containerd 12785
 cherry_pick_pr containerd/containerd 12865
 cherry_pick_pr dmcgowan/containerd 11 # This needs a PR on containerd/containerd still
 cherry_pick_pr containerd/containerd 12921 # sys, dialer: support AF_UNIX sockets on Windows
+cherry_pick_pr containerd/containerd 12938 # mount/manager: set sparse file attribute on Windows before mkfs
 
 
